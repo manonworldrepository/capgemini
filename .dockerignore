@@ -1,0 +1,10 @@
+# Git files
+.git
+.gitignore
+
+# IDE and build tool files
+.idea/
+target/
+
+# Log files
+*.log

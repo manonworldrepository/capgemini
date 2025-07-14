@@ -1,0 +1,26 @@
+FROM ghcr.io/graalvm/native-image-community:17-ol8 AS builder
+
+WORKDIR /app
+
+COPY .mvn .mvn
+COPY mvnw .
+COPY pom.xml .
+
+RUN chmod +x mvnw
+
+RUN ./mvnw dependency:go-offline
+
+COPY src ./src
+
+RUN ./mvnw clean package -Pnative -DskipTests
+
+
+FROM gcr.io/distroless/static-debian12
+
+WORKDIR /app
+
+COPY --from=builder /app/target/assessment .
+
+EXPOSE 8080
+
+ENTRYPOINT ["/app/assessment"]

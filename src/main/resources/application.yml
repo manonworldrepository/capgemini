@@ -1,0 +1,42 @@
+
+spring:
+  h2:
+    console:
+      enabled: true
+      path: /h2-console
+
+  datasource:
+    url: jdbc:h2:mem:testdb
+    driverClassName: org.h2.Driver
+    username: sa
+    password: ""
+
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include:
+          - health
+          - info
+          - metrics
+          - prometheus
+  endpoint:
+    health:
+      show-details: always
+
+info:
+  app:
+    name: Book and Author Management API
+    description: A RESTful service for managing books and authors.
+    version: 1.0.0
+
+logging:
+  level:
+    root: WARN
+    com.capgemini.twilight.assessment: INFO
+    com.capgemini.twilight.assessment.aspect: INFO
