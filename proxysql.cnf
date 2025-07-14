@@ -1,0 +1,33 @@
+admin_variables=
+{
+    admin_credentials="admin:admin_pass"
+    mysql_ifaces="0.0.0.0:6032"
+}
+
+mysql_users=
+(
+    {
+        username = "assessment_user"
+        password = "assessment_pass"
+        default_hostgroup = 0
+    }
+)
+
+mysql_servers=
+(
+    {
+        address = "mysql"
+        port = 3306
+        hostgroup = 0
+    }
+)
+
+mysql_query_rules=
+(
+    {
+        rule_id=1
+        active=1
+        destination_hostgroup=0
+        apply=1
+    }
+)

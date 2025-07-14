@@ -2,10 +2,39 @@ services:
   app:
     build:
       context: .
-      dockerfile: Dockerfile
-    image: book-author-api:latest
+      dockerfile: Dockerfile.native
+    image: book-author-api:native-latest
+    restart: unless-stopped
     ports:
       - "8080:8080"
+    environment:
+      - DB_URL=jdbc:mysql://proxysql:6033/assessment_db
+      - DB_USER=assessment_user
+      - DB_PASS=assessment_pass
+    depends_on:
+      - proxysql
+      - mysql
+
+  proxysql:
+    image: proxysql/proxysql:2.6.1
+    restart: unless-stopped
+    ports:
+      - "6032:6032"
+    volumes:
+      - ./proxysql.cnf:/etc/proxysql.cnf
+    depends_on:
+      - mysql
+
+  mysql:
+    image: mysql:8.0
     restart: unless-stopped
     environment:
-      - SPRING_PROFILES_ACTIVE=default
+      - MYSQL_ROOT_PASSWORD=root_pass
+      - MYSQL_DATABASE=assessment_db
+      - MYSQL_USER=assessment_user
+      - MYSQL_PASSWORD=assessment_pass
+    volumes:
+      - mysql_data:/var/lib/mysql
+
+volumes:
+  mysql_data:
