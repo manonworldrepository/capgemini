@@ -122,13 +122,17 @@ Default actuator endpoints are also installed
 Start the application on kubernetes:
 
 ``` minikube start ```
+
 ``` eval $(minikube -p minikube docker-env) ```
+
 ``` docker build -f Dockerfile.native -t book-author-api:latest . ```
+
 ``` kubectl apply -f deployment.yml ```
 
 Stop the application on kubernetes:
 
 ``` kubectl delete -f deployment.yml ```
+
 ``` minikube stop ```
 
 Start the application on docker:
