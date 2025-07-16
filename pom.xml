@@ -120,6 +120,12 @@
 								<phase>package</phase>
 							</execution>
 						</executions>
+						<configuration>
+							<buildArgs>
+								<buildArg>--static</buildArg>
+								<buildArg>--libc=glibc</buildArg>
+							</buildArgs>
+						</configuration>
 					</plugin>
 					<plugin>
 						<groupId>org.springframework.boot</groupId>

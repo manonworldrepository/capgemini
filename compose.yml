@@ -8,24 +8,40 @@ services:
     ports:
       - "8080:8080"
     environment:
-      - DB_URL=jdbc:mysql://proxysql:6033/assessment_db
+      - DB_URL=jdbc:mysql://proxysql-service:6033/assessment_db
       - DB_USER=assessment_user
       - DB_PASS=assessment_pass
     depends_on:
-      - proxysql
-      - mysql
+      proxysql-service:
+        condition: service_healthy
+      mysql-service:
+        condition: service_healthy
+    networks:
+      - assessment-net
 
-  proxysql:
-    image: proxysql/proxysql:2.6.1
+  proxysql-service:
+    build:
+      context: .
+      dockerfile: Dockerfile.proxysql
     restart: unless-stopped
+    command: proxysql --initial -f --idle-threads -c /etc/proxysql.cnf
     ports:
       - "6032:6032"
     volumes:
       - ./proxysql.cnf:/etc/proxysql.cnf
     depends_on:
-      - mysql
+      mysql-service:
+        condition: service_healthy
+    healthcheck:
+      test: [ "CMD-SHELL", "mysqladmin ping -h 127.0.0.1 -P 6032 -uadmin -padmin_pass || exit 1" ]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+      start_period: 15s
+    networks:
+      - assessment-net
 
-  mysql:
+  mysql-service:
     image: mysql:8.0
     restart: unless-stopped
     environment:
@@ -35,6 +51,18 @@ services:
       - MYSQL_PASSWORD=assessment_pass
     volumes:
       - mysql_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin" ,"ping", "-h", "localhost", "-uroot", "-proot_pass"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+    networks:
+      - assessment-net
+
+networks:
+  assessment-net:
+    driver: bridge
 
 volumes:
   mysql_data:

@@ -118,8 +118,7 @@ spec:
     spec:
       containers:
         - name: book-author-api-container
-          image: book-author-api:latest
-          imagePullPolicy: Never
+          image: DOCKER_IMAGE_PLACEHOLDER
           ports:
             - containerPort: 8080
           env:

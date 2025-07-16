@@ -1,0 +1,174 @@
+apiVersion: v1
+kind: Secret
+metadata:
+  name: db-secret
+type: Opaque
+stringData:
+  DB_PASS: "assessment_pass"
+  MYSQL_ROOT_PASSWORD: "root_pass"
+
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: db-config
+data:
+  DB_USER: "assessment_user"
+  DB_NAME: "assessment_db"
+  DB_URL: "jdbc:mysql://proxysql-service:6033/assessment_db"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: mysql-service
+spec:
+  selector:
+    app: mysql
+  ports:
+    - port: 3306
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mysql-deployment
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: mysql
+  template:
+    metadata:
+      labels:
+        app: mysql
+    spec:
+      containers:
+        - name: mysql
+          image: mysql:8.0
+          ports:
+            - containerPort: 3306
+          env:
+            - name: MYSQL_ROOT_PASSWORD
+              valueFrom: { secretKeyRef: { name: db-secret, key: MYSQL_ROOT_PASSWORD } }
+            - name: MYSQL_DATABASE
+              valueFrom: { configMapKeyRef: { name: db-config, key: DB_NAME } }
+            - name: MYSQL_USER
+              valueFrom: { configMapKeyRef: { name: db-config, key: DB_USER } }
+            - name: MYSQL_PASSWORD
+              valueFrom: { secretKeyRef: { name: db-secret, key: DB_PASS } }
+          readinessProbe:
+            exec:
+              command:
+                - /bin/sh
+                - -c
+                - "mysqladmin ping -h localhost -p$MYSQL_ROOT_PASSWORD"
+            initialDelaySeconds: 20
+            periodSeconds: 5
+          volumeMounts:
+            - name: mysql-persistent-storage
+              mountPath: /var/lib/mysql
+      volumes:
+        - name: mysql-persistent-storage
+          persistentVolumeClaim:
+            claimName: mysql-pvc
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: proxysql-service
+spec:
+  selector:
+    app: proxysql
+  ports:
+    - name: mysql
+      port: 6033
+    - name: admin
+      port: 6032
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: proxysql-deployment
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: proxysql
+  template:
+    metadata:
+      labels:
+        app: proxysql
+    spec:
+      containers:
+        - name: proxysql
+          image: PROXYSQL_IMAGE_PLACEHOLDER
+          imagePullPolicy: IfNotPresent
+          command: ["proxysql", "--initial", "-f", "--idle-threads", "-c", "/etc/proxysql.cnf"]
+          ports:
+            - name: mysql-port
+              containerPort: 6033
+            - name: admin-port
+              containerPort: 6032
+          readinessProbe:
+            exec:
+              command: ["mysqladmin", "ping", "-h", "127.0.0.1", "-P", "6032", "-uadmin", "-padmin_pass"]
+            initialDelaySeconds: 10
+            periodSeconds: 5
+          volumeMounts:
+            - name: config-volume
+              mountPath: /etc/proxysql.cnf
+              subPath: proxysql.cnf
+      volumes:
+        - name: config-volume
+          configMap:
+            name: proxysql-config
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: book-author-api-service
+spec:
+  type: NodePort
+  selector:
+    app: book-author-api
+  ports:
+    - port: 8080
+      targetPort: 8080
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: book-author-api-deployment
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: book-author-api
+  template:
+    metadata:
+      labels:
+        app: book-author-api
+    spec:
+      containers:
+        - name: book-author-api-container
+          image: APP_IMAGE_PLACEHOLDER
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 8080
+          env:
+            - name: DB_URL
+              valueFrom: { configMapKeyRef: { name: db-config, key: DB_URL } }
+            - name: DB_USER
+              valueFrom: { configMapKeyRef: { name: db-config, key: DB_USER } }
+            - name: DB_PASS
+              valueFrom: { secretKeyRef: { name: db-secret, key: DB_PASS } }
+          readinessProbe:
+            httpGet:
+              path: /actuator/health/readiness
+              port: 8080
+            initialDelaySeconds: 15
+            periodSeconds: 5

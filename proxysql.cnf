@@ -4,6 +4,13 @@ admin_variables=
     mysql_ifaces="0.0.0.0:6032"
 }
 
+mysql_variables=
+{
+    monitor_username="assessment_user"
+    monitor_password="assessment_pass"
+    monitor_connect_interval=2000 # Check connection every 2 seconds
+}
+
 mysql_users=
 (
     {
@@ -16,7 +23,7 @@ mysql_users=
 mysql_servers=
 (
     {
-        address = "mysql"
+        address = "mysql-service"
         port = 3306
         hostgroup = 0
     }

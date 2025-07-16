@@ -1,5 +1,7 @@
 FROM ghcr.io/graalvm/native-image-community:17-ol8 AS builder
 
+RUN microdnf install -y zlib-static
+
 WORKDIR /app
 
 COPY .mvn .mvn
@@ -11,11 +13,9 @@ RUN chmod +x mvnw
 RUN ./mvnw dependency:go-offline
 
 COPY src ./src
-
 RUN ./mvnw clean package -Pnative -DskipTests
 
-
-FROM gcr.io/distroless/static-debian12
+FROM oraclelinux:8-slim
 
 WORKDIR /app
 
