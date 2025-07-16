@@ -119,26 +119,34 @@ Default actuator endpoints are also installed
 
 ----------------------------------------------
 
-Start the application on kubernetes:
+### Start the application on kubernetes:
 
-``` minikube start ```
+``` docker build -t proxysql-custom:k8s-local -f Dockerfile.proxysql . ```
+
+``` docker build -t book-author-api:k8s-local -f Dockerfile.native . ```
+
+``` minikube start --memory 8192 --cpus 4 ```
 
 ``` eval $(minikube -p minikube docker-env) ```
 
-``` docker build -f Dockerfile.native -t book-author-api:latest . ```
+``` minikube image load proxysql-custom:k8s-local ```
 
-``` kubectl apply -f deployment.yml ```
+``` minikube image load book-author-api:k8s-local ```
 
-Stop the application on kubernetes:
+``` kubectl apply -f k8s-pvc.yml ```
 
-``` kubectl delete -f deployment.yml ```
+``` kubectl create configmap proxysql-config --from-file=proxysql.cnf ```
 
-``` minikube stop ```
+``` kubectl apply -f k8s-deployment.yml ```
 
-Start the application on docker:
+### Stop the application on kubernetes:
 
-``` docker compose up -d ```
+``` minikube delete ```
 
-Stop the application on docker:
+### Start the application on docker:
+
+``` docker compose up -d --build ```
+
+### Stop the application on docker:
 
 ``` docker compose down ```
