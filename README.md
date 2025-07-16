@@ -119,7 +119,7 @@ Default actuator endpoints are also installed
 
 ----------------------------------------------
 
-### Start the application on kubernetes:
+## Start the application on kubernetes:
 
 ``` docker build -t proxysql-custom:k8s-local -f Dockerfile.proxysql . ```
 
@@ -139,14 +139,14 @@ Default actuator endpoints are also installed
 
 ``` kubectl apply -f k8s-deployment.yml ```
 
-### Stop the application on kubernetes:
+## Stop the application on kubernetes:
 
 ``` minikube delete ```
 
-### Start the application on docker:
+## Start the application on docker:
 
 ``` docker compose up -d --build ```
 
-### Stop the application on docker:
+## Stop the application on docker:
 
 ``` docker compose down ```
