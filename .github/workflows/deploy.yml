@@ -55,10 +55,10 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Set up Kubeconfig
-        uses: aklaswad/k8s-multi-cluster-deployment@v1.1.0
-        with:
-          kubeconfig: ${{ secrets.KUBE_CONFIG }}
+      - name: Set up Kubeconfig from secret
+        run: |
+          mkdir -p ~/.kube
+          echo "${{ secrets.KUBE_CONFIG }}" > ~/.kube/config
 
       - name: Update deployment manifest with new images
         run: |
