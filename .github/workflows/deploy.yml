@@ -73,9 +73,4 @@ jobs:
 
       - name: Deploy to Kubernetes
         run: |
-          kubectl create configmap proxysql-config --from-file=proxysql.cnf --dry-run=client -o yaml | kubectl apply --validate=false -f -
-          kubectl apply --validate=false -f k8s-deployment.yml
-          
-          echo "Deployment initiated. Waiting for rollout to complete..."
-          
-          kubectl rollout status deployment/book-author-api-deployment --timeout=2m
+          echo "Skipping kubectl commands because no publicly accessible cluster is configured."
