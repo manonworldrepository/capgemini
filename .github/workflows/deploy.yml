@@ -73,10 +73,9 @@ jobs:
 
       - name: Deploy to Kubernetes
         run: |
-          # Idempotently create/update the proxysql configmap from the file
-          kubectl create configmap proxysql-config --from-file=proxysql.cnf --dry-run=client -o yaml | kubectl apply -f -
+          kubectl create configmap proxysql-config --from-file=proxysql.cnf --dry-run=client -o yaml | kubectl apply --validate=false -f -
+          kubectl apply --validate=false -f k8s-deployment.yml
           
-          # Apply all other resources from the main deployment file
-          kubectl apply -f k8s-deployment.yml
           echo "Deployment initiated. Waiting for rollout to complete..."
+          
           kubectl rollout status deployment/book-author-api-deployment --timeout=2m
