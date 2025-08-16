@@ -111,7 +111,7 @@ These tests test the search functionalities
 
 These methods are used as utilities in the test, you can look at them if you want, but they are not very important
 
-Solution:
+# Solution:
 
 To run tests and see the passing tests ``` ./mvnw clean test ```
 To run API Docs ``` ./mvnw spring-boot:run ``` and then point your browser to ``` http://localhost:8080/swagger-ui.html ```
